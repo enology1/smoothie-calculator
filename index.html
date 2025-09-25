@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smoothie Macro Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .ingredient {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .ingredient label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .ingredient .slider-container {
+            display: flex;
+            align-items: center;
+        }
+        .ingredient input[type="range"] {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .ingredient .quantity {
+            min-width: 50px;
+            text-align: right;
+        }
+        #totals {
+            background: #e0f7fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        #totals h2 {
+            margin-top: 0;
+        }
+        #totals p {
+            margin: 5px 0;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smoothie Macro Calculator</h1>
+    <p>Select quantities (in grams) for each ingredient using the sliders. Totals update automatically.</p>
+    
+    <div id="ingredients"></div>
+    
+    <div id="totals">
+        <h2>Total Macros</h2>
+        <p>Calories: <span id="total-calories">0</span> kcal</p>
+        <p>Protein: <span id="total-protein">0</span> g</p>
+        <p>Fat: <span id="total-fat">0</span> g</p>
+        <p>Carbs: <span id="total-carbs">0</span> g</p>
+    </div>
+
+    <script>
+        // Database of ingredients with macros per 100g
+        // Data sourced from general nutritional information (approximate values)
+        const ingredients = [
+            {
+                name: "Banana",
+                calories: 89,  // kcal per 100g
+                protein: 1.1, // g per 100g
+                fat: 0.3,     // g per 100g
+                carbs: 23     // g per 100g
+            },
+            {
+                name: "Apple",
+                calories: 52,
+                protein: 0.3,
+                fat: 0.2,
+                carbs: 14
+            },
+            {
+                name: "Strawberry",
+                calories: 32,
+                protein: 0.7,
+                fat: 0.3,
+                carbs: 8
+            },
+            {
+                name: "Blueberry",
+                calories: 57,
+                protein: 0.7,
+                fat: 0.3,
+                carbs: 14
+            },
+            {
+                name: "Spinach",
+                calories: 23,
+                protein: 2.9,
+                fat: 0.4,
+                carbs: 3.6
+            },
+            {
+                name: "Kale",
+                calories: 49,
+                protein: 4.3,
+                fat: 0.9,
+                carbs: 9
+            },
+            {
+                name: "Greek Yogurt (plain, nonfat)",
+                calories: 59,
+                protein: 10,
+                fat: 0.4,
+                carbs: 3.6
+            },
+            {
+                name: "Almond Milk (unsweetened)",
+                calories: 13,
+                protein: 0.4,
+                fat: 1.1,
+                carbs: 0.3
+            },
+            {
+                name: "Whey Protein Powder",
+                calories: 400,  // Note: This is approximate for powder; adjust based on brand
+                protein: 80,
+                fat: 5,
+                carbs: 10
+            },
+            {
+                name: "Peanut Butter (natural)",
+                calories: 588,
+                protein: 25,
+                fat: 50,
+                carbs: 20
+            }
+        ];
+
+        // Function to create ingredient UI
+        function createIngredientUI(ingredient, index) {
+            const div = document.createElement('div');
+            div.className = 'ingredient';
+            div.innerHTML = `
+                <label>${ingredient.name} (per 100g: ${ingredient.calories} kcal, ${ingredient.protein}g protein, ${ingredient.fat}g fat, ${ingredient.carbs}g carbs)</label>
+                <div class="slider-container">
+                    <input type="range" min="0" max="500" value="0" step="10" id="slider-${index}">
+                    <span class="quantity" id="quantity-${index}">0g</span>
+                </div>
+            `;
+            return div;
+        }
+
+        // Render ingredients
+        const ingredientsContainer = document.getElementById('ingredients');
+        ingredients.forEach((ing, index) => {
+            ingredientsContainer.appendChild(createIngredientUI(ing, index));
+        });
+
+        // Update totals function
+        function updateTotals() {
+            let totalCalories = 0;
+            let totalProtein = 0;
+            let totalFat = 0;
+            let totalCarbs = 0;
+
+            ingredients.forEach((ing, index) => {
+                const quantity = parseInt(document.getElementById(`slider-${index}`).value);
+                const factor = quantity / 100;
+                totalCalories += ing.calories * factor;
+                totalProtein += ing.protein * factor;
+                totalFat += ing.fat * factor;
+                totalCarbs += ing.carbs * factor;
+
+                document.getElementById(`quantity-${index}`).textContent = `${quantity}g`;
+            });
+
+            document.getElementById('total-calories').textContent = Math.round(totalCalories);
+            document.getElementById('total-protein').textContent = totalProtein.toFixed(1);
+            document.getElementById('total-fat').textContent = totalFat.toFixed(1);
+            document.getElementById('total-carbs').textContent = totalCarbs.toFixed(1);
+        }
+
+        // Add event listeners to sliders
+        ingredients.forEach((_, index) => {
+            const slider = document.getElementById(`slider-${index}`);
+            slider.addEventListener('input', updateTotals);
+        });
+
+        // Initial update
+        updateTotals();
+    </script>
+</body>
+</html>
